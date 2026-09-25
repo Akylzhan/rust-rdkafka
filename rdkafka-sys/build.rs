@@ -49,10 +49,22 @@ fn main() {
         _ => panic!("Version format is not valid"),
     };
 
+    if let Ok(library) = pkg_config::Config::new()
+        .cargo_metadata(true)
+        .atleast_version(librdkafka_version)
+        .probe("rdkafka")
+    {
+        eprintln!("librdkafka found on the system:");
+        eprintln!("  Name: {:?}", library.libs);
+        eprintln!("  Path: {:?}", library.link_paths);
+        eprintln!("  Version: {}", library.version);
+        return;
+    }
+
     let pkg_probe = pkg_config::Config::new()
         .cargo_metadata(true)
         .atleast_version(librdkafka_version)
-        .probe("rdkafka");
+        .probe("rdkafka-static");
 
     match pkg_probe {
         Ok(library) => {
