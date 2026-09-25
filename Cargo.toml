@@ -50,10 +50,6 @@ anyhow = { version = "1.0.100" }
 [features]
 default = ["libz", "tokio"]
 naive-runtime = ["futures-executor"]
-cmake-build = ["rdkafka-sys/cmake-build"]
-cmake_build = ["rdkafka-sys/cmake_build"]
-dynamic-linking = ["rdkafka-sys/dynamic-linking"]
-dynamic_linking = ["rdkafka-sys/dynamic_linking"]
 ssl = ["rdkafka-sys/ssl"]
 ssl-vendored = ["rdkafka-sys/ssl-vendored"]
 gssapi = ["rdkafka-sys/gssapi"]
@@ -67,7 +63,6 @@ zstd = ["rdkafka-sys/zstd"]
 zstd-pkg-config = ["rdkafka-sys/zstd-pkg-config"]
 external-lz4 = ["rdkafka-sys/external-lz4"]
 external_lz4 = ["rdkafka-sys/external_lz4"]
-static-linking = ["rdkafka-sys/static-linking"]
 
 [package.metadata.docs.rs]
 # docs.rs doesn't allow writing to ~/.cargo/registry (reasonably), so we have to

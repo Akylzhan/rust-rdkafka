@@ -33,21 +33,6 @@ path = "src/lib.rs"
 [features]
 default = ["libz"]
 
-# Build librdkafka with its CMake build system, rather than its default "mklove"
-# build system. This feature requires that the system has CMake installed.
-cmake-build = ["cmake"]
-
-# Deprecated alias for the `cmake-build` feature.
-cmake_build = ["cmake-build"]
-
-# Dynamically link the system's librdkafka, rather than building and linking the
-# bundled version statically. This feature requires that the system has
-# librdkafka installed somewhere where pkg-config can find it.
-dynamic-linking = []
-
-# Deprecated alias for the `dynamic-linking` feature.
-dynamic_linking = ["dynamic-linking"]
-
 # Enable SSL support.
 ssl = ["openssl-sys"]
 
@@ -92,11 +77,3 @@ external-lz4 = ["lz4-sys"]
 
 # Deprecated alias for the `external-lz4` feature.
 external_lz4 = ["external-lz4"]
-
-# Link against precompiled static build of librdkafka
-static-linking = []
-
-[package.metadata.docs.rs]
-# docs.rs doesn't allow writing to ~/.cargo/registry (reasonably), so we have to
-# use the CMake build for a proper out-of-tree build.
-features = ["cmake_build"]

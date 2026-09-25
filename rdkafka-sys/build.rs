@@ -40,63 +40,35 @@ where
 }
 
 fn main() {
-    if env::var("CARGO_FEATURE_DYNAMIC_LINKING").is_ok() {
-        eprintln!("librdkafka will be linked dynamically");
+    let librdkafka_version = match env!("CARGO_PKG_VERSION")
+        .split('+')
+        .collect::<Vec<_>>()
+        .as_slice()
+    {
+        [_rdsys_version, librdkafka_version] => *librdkafka_version,
+        _ => panic!("Version format is not valid"),
+    };
 
-        let librdkafka_version = match env!("CARGO_PKG_VERSION")
-            .split('+')
-            .collect::<Vec<_>>()
-            .as_slice()
-        {
-            [_rdsys_version, librdkafka_version] => *librdkafka_version,
-            _ => panic!("Version format is not valid"),
-        };
+    let pkg_probe = pkg_config::Config::new()
+        .cargo_metadata(true)
+        .atleast_version(librdkafka_version)
+        .probe("rdkafka");
 
-        let pkg_probe = pkg_config::Config::new()
-            .cargo_metadata(true)
-            .atleast_version(librdkafka_version)
-            .probe("rdkafka");
-
-        match pkg_probe {
-            Ok(library) => {
-                eprintln!("librdkafka found on the system:");
-                eprintln!("  Name: {:?}", library.libs);
-                eprintln!("  Path: {:?}", library.link_paths);
-                eprintln!("  Version: {}", library.version);
-            }
-            Err(err) => {
-                eprintln!(
-                    "librdkafka {} cannot be found on the system: {}",
-                    librdkafka_version, err
-                );
-                eprintln!("Dynamic linking failed. Exiting.");
-                process::exit(1);
-            }
+    match pkg_probe {
+        Ok(library) => {
+            eprintln!("librdkafka found on the system:");
+            eprintln!("  Name: {:?}", library.libs);
+            eprintln!("  Path: {:?}", library.link_paths);
+            eprintln!("  Version: {}", library.version);
         }
-    } else if env::var("CARGO_FEATURE_STATIC_EXTERNAL").is_ok() {
-        if let Ok(rdkafka_dir) = env::var("DEP_LIBRDKAFKA_STATIC_ROOT") {
-            println!("cargo:rustc-link-search=native={}/src", rdkafka_dir);
-            println!("cargo:rustc-link-lib=static=rdkafka");
-            println!("cargo:root={}", rdkafka_dir);
-        } else {
+        Err(err) => {
             eprintln!(
-                "Path to DEP_LIBRDKAFKA_STATIC_ROOT not set. Static linking failed. Exiting."
+                "librdkafka {} cannot be found on the system: {}",
+                librdkafka_version, err
             );
+            eprintln!("Linking failed. Exiting.");
             process::exit(1);
         }
-        eprintln!("librdkafka will be linked statically using prebuilt binaries");
-    } else {
-        // Ensure that we are in the right directory
-        let rdkafkasys_root = Path::new("rdkafka-sys");
-        if rdkafkasys_root.exists() {
-            assert!(env::set_current_dir(rdkafkasys_root).is_ok());
-        }
-        if !Path::new("librdkafka/LICENSE").exists() {
-            eprintln!("Setting up submodules");
-            run_command_or_fail("../", "git", &["submodule", "update", "--init"]);
-        }
-        eprintln!("Building and linking librdkafka statically");
-        build_librdkafka();
     }
 }
 
